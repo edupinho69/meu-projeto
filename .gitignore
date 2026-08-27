@@ -1,6 +1,8 @@
 dados/bronze/*
 dados/prata/*
 dados/ouro/*
+relatorios/
+
 !dados/**/.gitkeep
 .venv/
 __pycache__/
