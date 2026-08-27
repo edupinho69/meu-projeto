@@ -1,4 +1,4 @@
-dados/bronze/paises*
+dados/bronze/*
 dados/prata/*
 dados/ouro/*
 !dados/**/.gitkeep
