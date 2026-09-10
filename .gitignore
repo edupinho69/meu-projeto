@@ -7,3 +7,4 @@ relatorios/
 .venv/
 __pycache__/
 kaggle.json
+!dados/prata/proveniencia.jsonl
