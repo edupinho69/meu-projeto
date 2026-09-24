@@ -1,19 +1,21 @@
 from pathlib import Path
+
 import pandas as pd
 from data_profiling import ProfileReport
 
-BRONZE = Path("dados/bronze/music")
+BRONZE = Path("dados/bronze/musica")
 PADRAO = "music_*.csv"
-
 RELATORIOS = Path("relatorios")
 
-def mais_recente():
+
+def mais_recente() -> Path:
     arquivos = sorted(BRONZE.glob(PADRAO))
     if not arquivos:
-        raise FileNotFoundError("Bronze vazia")
+        raise FileNotFoundError("bronze vazia")
     return arquivos[-1]
 
-def gerar(caminho):
+
+def gerar(caminho: Path) -> Path:
     df = pd.read_csv(caminho)
     perfil = ProfileReport(df, title=caminho.name)
     RELATORIOS.mkdir(exist_ok=True)
@@ -21,10 +23,12 @@ def gerar(caminho):
     perfil.to_file(saida)
     return saida
 
+
 def main():
     caminho = mais_recente()
-    print("Perfilando: ", caminho.name)
+    print("perfilando:", caminho.name)
     print(gerar(caminho))
+
 
 if __name__ == "__main__":
     main()
