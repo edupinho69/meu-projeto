@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import pandas as pd
 from data_profiling import ProfileReport
 
@@ -7,15 +6,15 @@ BRONZE = Path("dados/bronze/musica")
 PADRAO = "music_*.csv"
 RELATORIOS = Path("relatorios")
 
-
-def mais_recente() -> Path:
+#Funcao responsavel por pegar a versao mais recente do CSV presente na camada BRONZE
+def mais_recente():
     arquivos = sorted(BRONZE.glob(PADRAO))
     if not arquivos:
         raise FileNotFoundError("bronze vazia")
     return arquivos[-1]
 
-
-def gerar(caminho: Path) -> Path:
+#Funcao responsavel por criar o arquivo HTML com os dados atraves do ProfileReport
+def gerar(caminho):
     df = pd.read_csv(caminho)
     perfil = ProfileReport(df, title=caminho.name)
     RELATORIOS.mkdir(exist_ok=True)

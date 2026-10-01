@@ -3,21 +3,21 @@ import shutil
 from datetime import date, datetime
 from pathlib import Path
 
-ORIGEM = Path("music_original_recebido.csv")
-BRONZE = Path("dados/bronze/musica")
+ORIGEM = Path("mxmh_original_recebido.csv")
+BRONZE = Path("dados/bronze/mxmh")
 
 #Funcao responsavel por copiar o arquivo CSV atual para a camada BRONZE com data do dia
 def copiar(origem):
     BRONZE.mkdir(parents=True, exist_ok=True)
     hoje = date.today().strftime("%Y%m%d")
-    destino = BRONZE / f"music_{hoje}.csv"
+    destino = BRONZE / f"mxmh_{hoje}.csv"
     shutil.copy(origem, destino)
     return destino
 
 #Funcao responsavel por registrar a proveniencia do arquivo no jsonl
 def registrar(origem, destino):
     info = {
-        "fonte": "arquivo recebido do usuario (music.csv)",
+        "fonte": "arquivo recebido do usuario (mxmh_survey_results.csv)",
         "canal": "arquivo baixado/recebido",
         "arquivo_origem": origem.name,
         "arquivo_bronze": destino.name,

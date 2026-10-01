@@ -1,9 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
-
 import pandas as pd
-
 import limpeza
 
 BRONZE = Path("dados/bronze/musica")
@@ -31,7 +29,7 @@ FAIXAS_VALIDAS = {
     "Blood_Pressure": (60, 220),   
 }
 
-
+#Funcao responsavel por carregar o arquivo CSV mais recente da camada bronze
 def carregar():
     arquivos = sorted(BRONZE.glob(PADRAO))
     if not arquivos:
@@ -41,13 +39,15 @@ def carregar():
     print("lido:", caminho.name, df.shape)
     return df, caminho
 
-
+#Funcao responsavel por identificar e remover registros duplicados pela chave primaria
 def conferir_chave(df, chave=CHAVE):
     repetidas = df[chave].duplicated().sum()
     print("chaves repetidas:", repetidas)
+    if repetidas:
+        print(df[df[chave].duplicated(keep=False)])
     return df.drop_duplicates(subset=chave)
 
-
+#Funcao responsavel por converter os tipos das colunas para categoricas ordenadas, categoricas e datetime
 def tipar_colunas(df):
     antes_nivel = df["Class_Level"].isna().sum()
     df["Class_Level"] = pd.Categorical(
@@ -68,7 +68,7 @@ def tipar_colunas(df):
 
     return df
 
-
+#Funcao responsavel por verificar as colunas que estao fora do limite usando as funcoes de limpeza.py
 def checar_extremos(df):
     for c in COLUNAS_NUMERICAS_CHECAR:
         df = limpeza.marcar_extremos(df, c)
@@ -79,33 +79,26 @@ def checar_extremos(df):
             print(f"{c}: IQR={n_iqr} | z-score={n_z}")
     return df
 
-
+#Funcao responsavel por remover os erros encontrados na funcao anterior
 def remover_erros_comprovados(df):
-    total_removido = 0
     for coluna, (minimo, maximo) in FAIXAS_VALIDAS.items():
-        valido = df[coluna].between(minimo, maximo)
-        removidos = (~valido).sum()
-        if removidos:
-            print(f"removidos por faixa invalida em {coluna}: {removidos}")
-            total_removido += removidos
-            df = df[valido].copy()
-    if total_removido == 0:
-        print("nenhum erro comprovado por faixa de dominio")
+        print(coluna, end=" - ")
+        df = limpeza.remover_erros(df, coluna, minimo, maximo)
     return df
 
-
+#Funcao responsavel por criar o atributo derivado de precisao ajustada por minuto de aula
 def precisao_por_minuto(df):
     df["precisao_por_minuto"] = df["Accuracy"] / (df["Duration"] / 60)
     return df
 
-
+#Funcao responsavel por categorizar os alunos em faixas etarias predefinidas
 def faixa_etaria(df):
     df["faixa_etaria"] = pd.cut(
         df["Age"], bins=[9, 12, 15, 17], labels=["10-12", "13-15", "16-17"]
     )
     return df
 
-
+#Funcao responsavel por categorizar a pontuacao de desempenho em quartis
 def desempenho_quartil(df):
     df["desempenho_quartil"] = pd.qcut(
         df["Performance_Score"], q=4,
@@ -113,7 +106,7 @@ def desempenho_quartil(df):
     )
     return df
 
-
+#Funcao responsavel por salvar os resultados no arquivo parquet na camada PRATA
 def salvar(df):
     PRATA.mkdir(parents=True, exist_ok=True)
     destino = PRATA / "musica.parquet"
@@ -121,7 +114,7 @@ def salvar(df):
     print("salvo em:", destino, df.shape)
     return destino
 
-
+#Funcao responsavel por registrar tudo no arquivo jsonl proveniencia da camada PRATA
 def registrar(origem, destino, antes, depois, decisoes):
     info = {
         "origem": origem.name,
